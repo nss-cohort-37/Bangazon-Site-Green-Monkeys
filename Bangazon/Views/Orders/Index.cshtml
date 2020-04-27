@@ -1,59 +1,69 @@
-﻿@model IEnumerable<Bangazon.Models.Order>
+﻿
+@model Bangazon.Models.OrderViewModels.OrderDetailViewModel
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Cart</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+
+
+   
 <table class="table">
+
+    @*headers*@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.OrderId)
+                Product
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateCreated)
+                Qunatity
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateCompleted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UserId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentTypeId)
+                Price
             </th>
             <th></th>
+
         </tr>
     </thead>
+
+    @*Body*@
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrderId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateCreated)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateCompleted)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UserId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaymentTypeId)
-            </td>
+
+
+        @foreach (var lineitem in Model.LineItems)
+        {
+            <tr>
+
+                <td>
+                    @lineitem.Product.Title
+                </td>
+                <td>
+                    @lineitem.Units
+                </td>
+                <td>
+                   $@lineitem.Cost
+                </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
                 @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
                 @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
             </td>
-        </tr>
-}
+            </tr>
+
+
+                   
+        }
+
+    <tr>
+        <td></td>
+        <td> Cart total: </td>
+        <td>$@ViewBag.TotalPrice</td>
+        <td></td>
+    </tr>
+
     </tbody>
 </table>
+<button class="btn btn-outline-success">Complete Order</button>

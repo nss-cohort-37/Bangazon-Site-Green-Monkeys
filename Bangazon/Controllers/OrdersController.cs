@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bangazon.Data;
 using Bangazon.Models;
+using Bangazon.Models.OrderViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,9 @@ namespace Bangazon.Controllers
         {
             var user = await GetCurrentUserAsync();
 
+            
 
+            
             // filtering items so we only see our own and not other users
             if (user == null)
             {
@@ -35,12 +38,33 @@ namespace Bangazon.Controllers
             }
             else if (filter == "cart")
             {
-                var order = await _context.Order
-                     .Where(o => o.UserId == user.Id)
-                     .Where(o => o.PaymentType == null)
-                     .ToListAsync();
+                var viewModel = new OrderDetailViewModel();
 
-                return View(order);
+
+                var order = await _context.Order
+                                    .Where(o => o.UserId == user.Id)
+                                    .Include(u => user.PaymentTypes)
+                                    .Include(u => u.OrderProducts)
+                                    .ThenInclude(op => op.Product)
+                                    .FirstOrDefaultAsync(o => o.PaymentType == null);
+
+
+
+                var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
+                {
+                    Product = op.Product,
+                    Units = op.Product.Quantity,
+                    Cost = op.Product.Price,
+                });
+
+                ViewBag.TotalPrice = lineItems.Sum(li => li.Cost);
+               
+
+                viewModel.LineItems = lineItems;
+               
+                viewModel.Order = order; 
+
+                return View(viewModel);
 
             } else
             {
@@ -125,6 +149,19 @@ namespace Bangazon.Controllers
         }
 
         private Task<ApplicationUser> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
+        private async Task<List<Order>> GetUnfulfilledOrders()
+        {
+            var user = await GetCurrentUserAsync();
 
+            var orders = await _context.Order
+                    .Where(o => o.UserId == user.Id)
+                    .Include(u => user.PaymentTypes)
+                    .Include(u => u.OrderProducts)
+                    .ThenInclude(op => op.Product)
+                    .Where(o => o.PaymentType == null)
+                    .ToListAsync();
+
+            return orders;
+        }
     }
 }
