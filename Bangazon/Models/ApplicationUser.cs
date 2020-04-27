@@ -20,6 +20,8 @@ namespace Bangazon.Models
         [Display(Name ="Last Name")]
         public string LastName { get; set; }
 
+        
+
         [Required]
         public string StreetAddress { get; set; }
         
