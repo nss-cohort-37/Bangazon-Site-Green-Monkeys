@@ -78,6 +78,11 @@ namespace Bangazon.Controllers
             
         }
 
+        
+        public ActionResult OrderSummary(int id)
+        {
+            return View();
+        }
         // GET: Orders/Details/5
         public ActionResult Details(int id)
         {
@@ -151,7 +156,7 @@ namespace Bangazon.Controllers
                 await _context.SaveChangesAsync();
 
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(OrderSummary));
             }
             catch
             {
@@ -174,7 +179,7 @@ namespace Bangazon.Controllers
             {
                 // TODO: Add delete logic here
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(OrderSummary));
             }
             catch
             {
