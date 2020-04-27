@@ -8,6 +8,7 @@ using Bangazon.Models.OrderViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bangazon.Controllers
@@ -47,7 +48,10 @@ namespace Bangazon.Controllers
                                     .Include(u => u.OrderProducts)
                                     .ThenInclude(op => op.Product)
                                     .FirstOrDefaultAsync(o => o.PaymentType == null);
-
+                if (order == null)
+                {
+                    return NotFound();
+                }
 
 
                 var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
@@ -62,7 +66,8 @@ namespace Bangazon.Controllers
 
                 viewModel.LineItems = lineItems;
                
-                viewModel.Order = order; 
+                viewModel.Order = order;
+                viewModel.OrderId = order.OrderId;
 
                 return View(viewModel);
 
@@ -103,19 +108,48 @@ namespace Bangazon.Controllers
         }
 
         // GET: Orders/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
-            return View();
+            var user = await GetCurrentUserAsync();
+            var viewModel = new OrderEditViewModel();
+            //var paymentTypes = await _context.PaymentType.Where(pt => pt.UserId == user.Id).ToListAsync();
+            var order = await _context.Order.FirstOrDefaultAsync(o => o.OrderId == id);
+
+            var paymentTypes = await _context.PaymentType
+               .Select(pt => new SelectListItem()
+               {
+                   Text = pt.Description,
+                   Value = pt.PaymentTypeId.ToString()
+               }).ToListAsync();
+
+
+            viewModel.paymentTypes = paymentTypes;
+            viewModel.order =  order;
+
+            if (order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            return View(viewModel);
         }
 
         // POST: Orders/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(int id, Order order)
         {
             try
             {
-                // TODO: Add update logic here
+                var user = await GetCurrentUserAsync();
+                order.UserId = user.Id;
+                order.OrderId = id;
+            
+                order.DateCompleted = DateTime.Now;
+                
+                _context.Order.Update(order);
+                await _context.SaveChangesAsync();
+
 
                 return RedirectToAction(nameof(Index));
             }
