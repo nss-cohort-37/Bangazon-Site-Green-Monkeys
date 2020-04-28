@@ -48,12 +48,17 @@ namespace Bangazon.Controllers
                                     .ThenInclude(op => op.Product)
                                     .FirstOrDefaultAsync(o => o.PaymentType == null);
 
-                // if order comes back empty return an empty cart page
-                if (order.OrderProducts.Count == 0)
+                
+
+
+
+                    // if order comes back empty return an empty cart page
+                    if (order.OrderProducts.Count == 0)
                 {
 
                     return RedirectToAction(nameof(EmptyCart));
                 }
+
 
                 //build the individual lines of products in the cart to show the quantity and price
                 var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
@@ -79,6 +84,67 @@ namespace Bangazon.Controllers
             }
             
         }
+
+
+        // GET: Orders History
+        public async Task<ActionResult> History(string filter)
+        {
+            var user = await GetCurrentUserAsync();
+
+            // Check if the user is logged in, if they aren't, return 401
+            if (user == null)
+            {
+                return new StatusCodeResult(StatusCodes.Status401Unauthorized);
+            }
+            //if they are and the filter is cart, show them their cart
+            else if (filter == "history")
+            {
+                // build the item as a view model so we can show more information
+                var viewModel = new OrderDetailViewModel();
+
+                // Grab the order and all of it's products for the order that has no payment yet
+                var order = await _context.Order
+                                    .Where(o => o.UserId == user.Id)
+                                    .Include(u => user.PaymentTypes)
+                                    .Include(u => u.OrderProducts)
+                                    .ThenInclude(op => op.Product)
+                                    .Where(o => o.PaymentType != null).ToListAsync();
+
+                //// if order comes back empty return an empty cart page
+                //if (order.OrderProducts.Count == 0)
+                //{
+
+                //    return RedirectToAction(nameof(EmptyCart));
+                //}
+
+
+                //build the individual lines of products in the cart to show the quantity and price
+                var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
+                {
+                    Product = op.Product,
+                    Units = op.Product.Quantity,
+                    Cost = op.Product.Price,
+                });
+
+                //Sum the cost, store it in the view bag to use on the view as a total price
+                ViewBag.TotalPrice = lineItems.Sum(li => li.Cost);
+
+
+                viewModel.LineItems = lineItems;
+                viewModel.Order = order;
+                viewModel.OrderId = order.OrderId;
+
+                return View(viewModel);
+
+            }
+            else
+            {
+                return NotFound();
+            }
+
+        }
+
+
 
         //order summary/confirmation view
         public ActionResult OrderSummary(int id)
