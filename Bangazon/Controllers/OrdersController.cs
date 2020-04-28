@@ -30,8 +30,8 @@ namespace Bangazon.Controllers
             var user = await GetCurrentUserAsync();
 
 
-            filter = "cart";
             
+      
             // filtering items so we only see our own and not other users
             if (user == null)
             {
@@ -190,25 +190,49 @@ namespace Bangazon.Controllers
             }
         }
 
+        // GET: Orders/Delete/5
+        public async Task<ActionResult> CancelOrder(int id)
+        {
+            var order = await _context.Order.FirstOrDefaultAsync(i => i.OrderId == id);
+            return View(order);
+        }
+
+        // POST: Orders/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> CancelOrder(int id, Order Cart)
+        {
+            try
+            {
+                DeleteCartItems(id);
+
+                Cart = await _context.Order.FirstOrDefaultAsync(i => i.OrderId == id);
+                _context.Order.Remove(Cart);
+                await _context.SaveChangesAsync();
+
+                return this.RedirectToAction("", new { filter = "cart" });
+            }
+            catch
+            {
+                return View();
+            }
+        }
         private string HomeController(object nameof)
         {
             throw new NotImplementedException();
         }
 
         private Task<ApplicationUser> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
-        private async Task<List<Order>> GetUnfulfilledOrders()
+        private  void DeleteCartItems(int id)
         {
-            var user = await GetCurrentUserAsync();
+            var itemsToDelete =  _context.OrderProduct.Where(i => i.OrderId == id).ToList();
+            foreach(var item in itemsToDelete)
+            {
+            _context.OrderProduct.Remove(item);
 
-            var orders = await _context.Order
-                    .Where(o => o.UserId == user.Id)
-                    .Include(u => user.PaymentTypes)
-                    .Include(u => u.OrderProducts)
-                    .ThenInclude(op => op.Product)
-                    .Where(o => o.PaymentType == null)
-                    .ToListAsync();
-
-            return orders;
+            }
+            _context.SaveChanges();
         }
+       
     }
 }
