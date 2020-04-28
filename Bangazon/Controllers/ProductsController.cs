@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bangazon.Data;
 using Bangazon.Models;
+using Bangazon.Models.ProductViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bangazon.Controllers
@@ -78,11 +80,22 @@ namespace Bangazon.Controllers
 
         // GET: Products/Create
 
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
 
         {
+            var ProductTypes = await _context.ProductType
+                .Select(pt => new SelectListItem()
+                {
+                    Text = pt.Label,
+                    Value = pt.ProductTypeId.ToString() })
+                .ToListAsync();
 
-            return View();
+
+                var productCreateViewModel = new ProductCreateViewModel();
+
+            productCreateViewModel.ProductTypeOptions = ProductTypes;
+
+            return View(productCreateViewModel);
 
         }
 
@@ -91,21 +104,40 @@ namespace Bangazon.Controllers
         // POST: ShoppingItems/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(Product product)
+        public async Task<ActionResult> Create(ProductCreateViewModel productCreateViewModel)
         {
             try
             {
                 var user = await GetCurrentUserAsync();
-                product.UserId = user.Id;
+
+                var product = new Product
+                {
+                    DateCreated = productCreateViewModel.DateCreated,
+                    Price = productCreateViewModel.Price,
+                    Title = productCreateViewModel.Title,
+                    Description = productCreateViewModel.Description,
+                    UserId = user.Id,
+                    Quantity = productCreateViewModel.Quantity,
+                    ProductTypeId = productCreateViewModel.ProductTypeId,
+                    City = productCreateViewModel.City
+                };
+
+                productCreateViewModel.UserId = user.Id;
 
                 _context.Product.Add(product);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", new { id = product.ProductId });
             }
-            catch
+            catch (Exception)
             {
-                return View();
+                var productTypes = await _context.ProductType
+                    .Select (p => new SelectListItem() { Text = p.Label,
+                    Value = p.ProductTypeId.ToString() })
+                    .ToListAsync();
+                productCreateViewModel.ProductTypeOptions = productTypes;
+
+                return View(productCreateViewModel);
             }
         }
 
