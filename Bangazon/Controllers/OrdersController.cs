@@ -29,31 +29,33 @@ namespace Bangazon.Controllers
         {
             var user = await GetCurrentUserAsync();
 
-
-            
-      
-            // filtering items so we only see our own and not other users
+            // Check if the user is logged in, if they aren't, return 401
             if (user == null)
             {
                return new StatusCodeResult(StatusCodes.Status401Unauthorized);
             }
+            //if they are and the filter is cart, show them their cart
             else if (filter == "cart")
             {
+                // build the item as a view model so we can show more information
                 var viewModel = new OrderDetailViewModel();
 
-
+                // Grab the order and all of it's products for the order that has no payment yet
                 var order = await _context.Order
                                     .Where(o => o.UserId == user.Id)
                                     .Include(u => user.PaymentTypes)
                                     .Include(u => u.OrderProducts)
                                     .ThenInclude(op => op.Product)
                                     .FirstOrDefaultAsync(o => o.PaymentType == null);
-                if (order == null)
+
+                // if order comes back empty return an empty cart page
+                if (order.OrderProducts.Count == 0)
                 {
-                    return NotFound();
+
+                    return RedirectToAction(nameof(EmptyCart));
                 }
 
-
+                //build the individual lines of products in the cart to show the quantity and price
                 var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
                 {
                     Product = op.Product,
@@ -61,11 +63,11 @@ namespace Bangazon.Controllers
                     Cost = op.Product.Price,
                 });
 
+                //Sum the cost, store it in the view bag to use on the view as a total price
                 ViewBag.TotalPrice = lineItems.Sum(li => li.Cost);
                
 
                 viewModel.LineItems = lineItems;
-               
                 viewModel.Order = order;
                 viewModel.OrderId = order.OrderId;
 
@@ -78,8 +80,13 @@ namespace Bangazon.Controllers
             
         }
 
-        
+        //order summary/confirmation view
         public ActionResult OrderSummary(int id)
+        {
+            return View();
+        }
+
+        public ActionResult EmptyCart(int id)
         {
             return View();
         }
@@ -115,9 +122,10 @@ namespace Bangazon.Controllers
         // GET: Orders/Edit/5
         public async Task<ActionResult> Edit(int id)
         {
+            //this is the view to 'edit' the cart in order to complete the order. 
+            //all we are doing is adding a payment type to the order. 
             var user = await GetCurrentUserAsync();
             var viewModel = new OrderEditViewModel();
-            //var paymentTypes = await _context.PaymentType.Where(pt => pt.UserId == user.Id).ToListAsync();
             var order = await _context.Order.FirstOrDefaultAsync(o => o.OrderId == id);
 
             var paymentTypes = await _context.PaymentType
@@ -164,7 +172,7 @@ namespace Bangazon.Controllers
             }
         }
 
-        // GET: Orders/Delete/5
+        // GET: Orders/Delete/5 THIS IS DELETING INDIVIDUAL ITEMS FROM AN ORDER
         public async Task<ActionResult> Delete(int id)
         {
             var item = await _context.OrderProduct.Include(i => i.Product).FirstOrDefaultAsync(i => i.ProductId == id);
@@ -190,7 +198,7 @@ namespace Bangazon.Controllers
             }
         }
 
-        // GET: Orders/Delete/5
+        // GET: Orders/Delete/5  THIS IS DELETING THE ORDER
         public async Task<ActionResult> CancelOrder(int id)
         {
             var order = await _context.Order.FirstOrDefaultAsync(i => i.OrderId == id);
@@ -217,10 +225,7 @@ namespace Bangazon.Controllers
                 return View();
             }
         }
-        private string HomeController(object nameof)
-        {
-            throw new NotImplementedException();
-        }
+  
 
         private Task<ApplicationUser> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
         private  void DeleteCartItems(int id)
