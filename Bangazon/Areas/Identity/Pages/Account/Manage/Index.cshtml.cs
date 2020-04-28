@@ -23,10 +23,21 @@ namespace Bangazon.Areas.Identity.Pages.Account.Manage
             _signInManager = signInManager;
         }
 
+
+        [Display(Name = "User Name")]
         public string Username { get; set; }
 
         [TempData]
         public string StatusMessage { get; set; }
+
+
+
+        [Display(Name = "Orders")]
+        public List<Order> Orders { get; set; }
+
+        [Display(Name = "Payment Types")]
+        public List<PaymentType> PaymentTypes  { get; set; }
+
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -34,7 +45,7 @@ namespace Bangazon.Areas.Identity.Pages.Account.Manage
         public class InputModel
         {
             [Phone]
-            [Display(Name = "Phone number")]
+            [Display(Name = "Phone Number")]
             public string PhoneNumber { get; set; }
 
             // added LastName, StreetAddress,  PhoneNumber was already included
@@ -47,6 +58,12 @@ namespace Bangazon.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Address")]
             public string StreetAddress { get; set; }
+
+            [Display(Name = "Orders")]
+            public string Orders { get; set; }
+
+            [Display(Name = "Payment Types")]
+            public string Payment { get; set; }
 
 
         }
