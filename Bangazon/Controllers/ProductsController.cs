@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bangazon.Controllers
@@ -39,31 +40,24 @@ namespace Bangazon.Controllers
         }
 
 
-
-        // GET: Products
-
-        public async Task<ActionResult> Index()
-
+                // GET: Products
+        public async Task<ActionResult> Index(string searchString)
         {
-
             var user = await GetCurrentUserAsync();
+            var products = from p in _context.Product 
+                           select p;
+                ////.Where(p => p.UserId == user.Id)
+                //.Include(p => p.User)
+                //.Include(p => p.ProductType)
+                //.ToListAsync();
 
-            var products = await _context.Product
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(s => s.Title.Contains(searchString));
+            }
 
-                //.Where(p => p.UserId == user.Id)
-
-                .Include(p => p.User)
-
-                .Include(p => p.ProductType)
-
-                .ToListAsync();
-
-
-
-            return View(products);
-
+            return View(await products.ToListAsync());
         }
-
 
 
         // GET: Products/Details/5
@@ -119,7 +113,8 @@ namespace Bangazon.Controllers
                     UserId = user.Id,
                     Quantity = productCreateViewModel.Quantity,
                     ProductTypeId = productCreateViewModel.ProductTypeId,
-                    City = productCreateViewModel.City
+                    City = productCreateViewModel.City,
+                    ImagePath = productCreateViewModel.ImagePath
                 };
 
                 productCreateViewModel.UserId = user.Id;
