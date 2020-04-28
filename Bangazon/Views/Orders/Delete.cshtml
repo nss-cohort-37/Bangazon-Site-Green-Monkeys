@@ -1,0 +1,18 @@
+﻿@model Bangazon.Models.OrderProduct
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1 class="text-center">Remove @Model.Product.Title from cart</h1>
+
+  <hr />
+<h3 class="text-center">Are you sure you want to remove this item from your cart?</h3>
+<div>
+    
+    
+    <form asp-action="Delete">
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index" asp-route-filter="cart">Return to cart</a>
+    </form>
+</div>

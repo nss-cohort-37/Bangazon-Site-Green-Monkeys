@@ -29,8 +29,8 @@ namespace Bangazon.Controllers
         {
             var user = await GetCurrentUserAsync();
 
-            
 
+            filter = "cart";
             
             // filtering items so we only see our own and not other users
             if (user == null)
@@ -165,26 +165,34 @@ namespace Bangazon.Controllers
         }
 
         // GET: Orders/Delete/5
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            return View();
+            var item = await _context.OrderProduct.Include(i => i.Product).FirstOrDefaultAsync(i => i.ProductId == id);
+            return View(item);
         }
 
         // POST: Orders/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<ActionResult> Delete(int id, OrderProduct CartItem)
         {
             try
             {
-                // TODO: Add delete logic here
+                CartItem = await _context.OrderProduct.FirstOrDefaultAsync(i => i.ProductId == id);
+                _context.OrderProduct.Remove(CartItem);
+                await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(OrderSummary));
+                return  this.RedirectToAction("", new { filter = "cart" });
             }
             catch
             {
                 return View();
             }
+        }
+
+        private string HomeController(object nameof)
+        {
+            throw new NotImplementedException();
         }
 
         private Task<ApplicationUser> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
