@@ -26,22 +26,98 @@ namespace Bangazon.Controllers
         }
 
         // GET: Products
-        public async Task<ActionResult> Index(string searchString)
+        public async Task<ActionResult> Index(string searchString, string filter)
         {
             var user = await GetCurrentUserAsync();
-            var products = _context.Product
-                .Where(p => p.UserId == user.Id)
-                .Include(p => p.User)
-                .Include(p => p.ProductType);
-                //.ToListAsync();
+            List<Product> products;
+                  //.Where(p => p.UserId == user.Id)
+                  //.Include(p => p.User)
+                  //.Include(p => p.ProductType);
+                  //.ToListAsync();
 
-            if (!String.IsNullOrEmpty(searchString))
+            switch (filter)
             {
-                var filteredProducts = products.Where(s => s.Title.Contains(searchString));
+                case "Sporting Goods":
+                    products = await _context.Product
+                        //.Where(ti => ti.UserId == user.Id)
+                        .Where(ti => ti.ProductTypeId == 1)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Appliances":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 2)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Tools":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 3)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                        break;
+                case "Games":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 4)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Music":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 5)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Health":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 6)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Outdoors":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 7)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Beauty":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 8)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Shoes":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 9)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Automotive":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 10)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;                    
+                case "All":
+                    products = await _context.Product
+                        //.Where(ti => ti.UserId == user.Id)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                default:
+                    products = await _context.Product
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+            }
+
+            if (searchString != null)
+            {
+                var filteredProducts = _context.Product.Where(s => s.Title.Contains(searchString) || s.City.Contains(searchString));
                 return View(filteredProducts);
             };
 
-            return View(await products.ToListAsync());
+            return View(products);
         }
 
         // GET: Products/Details/5
