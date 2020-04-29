@@ -37,7 +37,7 @@ namespace Bangazon.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                var filteredProducts = products.Where(s => s.Title.Contains(searchString));
+                var filteredProducts = products.Where(s => s.Title.Contains(searchString) || s.City.Contains(searchString));
                 return View(filteredProducts);
             };
 

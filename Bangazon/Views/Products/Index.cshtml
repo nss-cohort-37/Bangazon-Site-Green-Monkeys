@@ -8,7 +8,7 @@
 
 <form asp-controller="Products" asp-action="Index">
     <div>
-        <input type="text" name="SearchString" placeholder=" Search by Title...">
+        <input type="text" name="SearchString"  placeholder=" Search by Title or City...">
         <input type="submit" value="Search" />
     </div>
 </form>
@@ -41,7 +41,7 @@
                 @Html.DisplayNameFor(model => model.UserId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Active)
+                @Html.DisplayNameFor(model => model.City)
             </th>
             <th></th>
         </tr>
@@ -72,7 +72,7 @@
                 @Html.DisplayFor(modelItem => item.User.FirstName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Active)
+                @Html.DisplayFor(modelItem => item.City)
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.ProductId })
