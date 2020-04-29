@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bangazon.Controllers
@@ -25,22 +26,34 @@ namespace Bangazon.Controllers
         }
 
         // GET: Products
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string searchString)
         {
             var user = await GetCurrentUserAsync();
-            var products = await _context.Product
-                //.Where(p => p.UserId == user.Id)
-                .Include(p => p.User)
-                .Include(p => p.ProductType)
-                .ToListAsync();
+            var products = from p in _context.Product 
+                           select p;
+                ////.Where(p => p.UserId == user.Id)
+                //.Include(p => p.User)
+                //.Include(p => p.ProductType)
+                //.ToListAsync();
 
-            return View(products);
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(s => s.Title.Contains(searchString));
+            }
+
+            return View(await products.ToListAsync());
         }
 
         // GET: Products/Details/5
-        public ActionResult Details(int id)
+        public async Task<ActionResult> Details(int id)
         {
-            return View();
+            var product = await _context.Product
+               //.Where(p => p.UserId == user.Id)
+               .Include(p => p.User)
+               .Include(p => p.ProductType)
+               .FirstOrDefaultAsync(p => p.ProductId == id);
+
+            return View(product);
         }
 
         // GET: Products/Create

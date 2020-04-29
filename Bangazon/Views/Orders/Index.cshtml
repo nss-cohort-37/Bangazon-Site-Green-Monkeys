@@ -1,0 +1,71 @@
+﻿
+@model Bangazon.Models.OrderViewModels.OrderDetailViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Cart</h1>
+
+
+
+   
+<table class="table">
+
+    @*headers*@
+    <thead>
+        <tr>
+            <th>
+                Product
+            </th>
+            <th>
+                Qunatity
+            </th>
+            <th>
+                Price
+            </th>
+            <th></th>
+
+        </tr>
+    </thead>
+
+    @*Body*@
+    <tbody>
+
+
+        @foreach (var lineitem in Model.LineItems)
+        {
+            <tr>
+
+                <td>
+                    @lineitem.Product.Title
+                </td>
+                <td>
+                    @lineitem.Units
+                </td>
+                <td>
+                   $@lineitem.Cost
+                </td>
+            <td>
+               @*
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+               *@ 
+                @Html.ActionLink("Remove From Cart", "Delete", new { id=lineitem.Product.ProductId  })
+            </td>
+            </tr>
+        
+        }
+
+    <tr>
+        <td></td>
+        <td> Cart total: </td>
+        <td>$@ViewBag.TotalPrice</td>
+        <td></td>
+    </tr>
+
+    </tbody>
+</table>
+
+<button class="btn btn-outline-success">@Html.ActionLink("Proceed to Checkout", "Edit", new {  id=Model.OrderId }) </button>
+<button class="btn btn-outline-danger">@Html.ActionLink("Cancel Order", "CancelOrder", new { id = Model.OrderId }) </button>
