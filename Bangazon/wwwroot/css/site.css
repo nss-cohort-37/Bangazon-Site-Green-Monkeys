@@ -58,3 +58,7 @@ body {
 .icon {
     max-width: 20%;
 }
+
+.bg-blue {
+    background-color: #00BFA5 !important;
+}
