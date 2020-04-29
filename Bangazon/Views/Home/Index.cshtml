@@ -20,7 +20,8 @@
             @Html.DisplayFor(modelItem => item.Price)
         </div>
         <div>
-            @Html.ActionLink("Read More", "Details", new {  id=item.ProductId  })
+            @Html.ActionLink("Read More",  "Details", "Products", new { id = item.ProductId })
+            
         </div>
     </div>
 </div>
