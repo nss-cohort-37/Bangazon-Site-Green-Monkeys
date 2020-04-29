@@ -35,19 +35,13 @@
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateCreated)
+                @Html.DisplayNameFor(model => model.ProductType)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.UserId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.City)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Active)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductType)
             </th>
             <th></th>
         </tr>
@@ -57,7 +51,7 @@
         {
         <tr>
             <td>
-                <image src="@Html.DisplayFor(modelItem => item.ImagePath)" alt="Product Image Unavailable" width="150" height="150"/>
+                <image src="@Html.DisplayFor(modelItem => item.ImagePath)" alt="Product Image Unavailable" width="150" height="150" />
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
@@ -72,19 +66,13 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.DateCreated)
+                @Html.DisplayFor(modelItem => item.ProductType.Label)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.User.FirstName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.City)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.Active)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductType.Label)
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.ProductId })
