@@ -4,7 +4,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Products</h1>
 
 <form asp-controller="Products" asp-action="Index">
     <div>
@@ -63,6 +63,7 @@
     <tbody>
         @foreach (var item in Model)
         {
+
             <tr>
                 <td>
                     <image src="@Html.DisplayFor(modelItem => item.ImagePath)" alt="Product Image Unavailable" width="150" height="150" />
@@ -89,9 +90,12 @@
                     @Html.DisplayFor(modelItem => item.City)
                 </td>
                 <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.ProductId })
+                    @Html.ActionLink("Add to Cart", "addToCart", new { id = item.ProductId }) |
+                    @*
+
+        @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
+                    *@
                     @Html.ActionLink("Details", "Details", new { id = item.ProductId })
-                    @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
                 </td>
             </tr>
         }
