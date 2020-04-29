@@ -56,6 +56,43 @@ namespace Bangazon.Controllers
             return View(product);
         }
 
+        // GET: Products/AddToCart
+        public async Task<ActionResult> AddToCart(int id)
+        {
+            var user = await GetCurrentUserAsync();
+            var product = await _context.Product.FirstOrDefaultAsync(p => p.ProductId == id);
+
+            return View(product);
+        }
+
+        // POST: Products/AddToCart
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> AddToCart(int id, Product product)
+        {
+            try
+            {
+                var user = await GetCurrentUserAsync();
+                var order = await _context.Order
+                               .Where(o => o.UserId == user.Id)
+                               .Include(u => user.PaymentTypes)
+                               .Include(u => u.OrderProducts)
+                               .ThenInclude(op => op.Product)
+                               .FirstOrDefaultAsync(o => o.PaymentType == null);
+                var orderProduct = new OrderProduct();
+                orderProduct.ProductId = id;
+                orderProduct.OrderId = order.OrderId;
+
+                _context.OrderProduct.Add(orderProduct);
+                await _context.SaveChangesAsync();
+
+                return this.RedirectToAction("", "Orders", new { filter = "cart" });
+            }
+            catch
+            {
+                return View();
+            }
+        }
         // GET: Products/Create
         public ActionResult Create()
         {
