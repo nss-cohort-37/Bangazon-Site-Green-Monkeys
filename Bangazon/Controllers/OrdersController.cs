@@ -48,16 +48,18 @@ namespace Bangazon.Controllers
                                     .ThenInclude(op => op.Product)
                                     .FirstOrDefaultAsync(o => o.PaymentType == null);
 
-                
 
-
-
-                    // if order comes back empty return an empty cart page
-                    if (order.OrderProducts.Count == 0)
+                // if order comes back empty return an empty cart page
+                if(order == null)
+                {
+                    return RedirectToAction(nameof(EmptyCart));
+                }
+                else if (order.OrderProducts.Count == 0 )
                 {
 
                     return RedirectToAction(nameof(EmptyCart));
-                }
+                }else
+                {
 
 
                 //build the individual lines of products in the cart to show the quantity and price
@@ -77,6 +79,8 @@ namespace Bangazon.Controllers
                 viewModel.OrderId = order.OrderId;
 
                 return View(viewModel);
+                }
+
 
             } else
             {
@@ -241,7 +245,20 @@ namespace Bangazon.Controllers
                 _context.Order.Update(order);
                 await _context.SaveChangesAsync();
 
-
+                var products = await _context.OrderProduct
+                                .Where(op => op.OrderId == order.OrderId).ToListAsync();
+                foreach( var product in products)
+                {
+                    var soldProduct = await _context.Product
+                                    .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
+                    soldProduct.Quantity -= 1;
+                    if (soldProduct.Quantity == 0)
+                    {
+                        soldProduct.Active = false;
+                    }
+                    _context.Product.Update(soldProduct);
+                    await _context.SaveChangesAsync();
+                }
                 return RedirectToAction(nameof(OrderSummary));
             }
             catch

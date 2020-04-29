@@ -26,22 +26,119 @@ namespace Bangazon.Controllers
         }
 
         // GET: Products
-        public async Task<ActionResult> Index(string searchString)
+        public async Task<ActionResult> Index(string searchString, string filter)
         {
             var user = await GetCurrentUserAsync();
-            var products = _context.Product
-                .Where(p => p.UserId == user.Id)
-                .Include(p => p.User)
-                .Include(p => p.ProductType);
-                //.ToListAsync();
+//<<<<<<< HEAD
+//            var products = _context.Product
+//                .Where(p => p.UserId == user.Id)
+//                .Where(p => p.Quantity > 0)
+//                .Include(p => p.User)
+//                .Include(p => p.ProductType);
+//                //.ToListAsync();
+//=======
+            List<Product> products;
+                  //.Where(p => p.UserId == user.Id)
+                  //.Include(p => p.User)
+                  //.Include(p => p.ProductType);
+                  //.ToListAsync();
 
-            if (!String.IsNullOrEmpty(searchString))
+
+            switch (filter)
             {
-                var filteredProducts = products.Where(s => s.Title.Contains(searchString));
+                case "Sporting Goods":
+                    products = await _context.Product
+                        //.Where(ti => ti.UserId == user.Id)
+                        .Where(ti => ti.ProductTypeId == 1)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Appliances":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 2)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Tools":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 3)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                        break;
+                case "Games":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 4)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Music":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 5)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Health":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 6)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Outdoors":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 7)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Beauty":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 8)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Shoes":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 9)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                case "Automotive":
+                    products = await _context.Product
+                        .Where(ti => ti.ProductTypeId == 10)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;                    
+                case "All":
+                    products = await _context.Product
+                        //.Where(ti => ti.UserId == user.Id)
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+                default:
+                    products = await _context.Product
+                        .Where(p => p.Quantity > 0)
+                        .Include(ti => ti.ProductType)
+                        .ToListAsync();
+                    break;
+            }
+
+            if (searchString != null)
+            {
+                var filteredProducts = _context.Product.Where(s => s.Title.Contains(searchString) || s.City.Contains(searchString));
                 return View(filteredProducts);
             };
 
-            return View(await products.ToListAsync());
+            return View(products);
         }
 
         // GET: Products/Details/5
@@ -56,6 +153,73 @@ namespace Bangazon.Controllers
             return View(product);
         }
 
+        // GET: Products/AddToCart
+        public async Task<ActionResult> AddToCart(int id)
+        {
+            var user = await GetCurrentUserAsync();
+            var product = await _context.Product.FirstOrDefaultAsync(p => p.ProductId == id);
+
+            return View(product);
+        }
+
+        // POST: Products/AddToCart
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> AddToCart(int id, Product product)
+        {
+            //We are adding a new product to the cart
+            try
+            {
+                var user = await GetCurrentUserAsync();
+                //Grabbing the order that doesn't have a payment type yet (i.e. the cart)
+                var order = await _context.Order
+                               .Where(o => o.UserId == user.Id)
+                               .Include(u => user.PaymentTypes)
+                               .Include(u => u.OrderProducts)
+                               .ThenInclude(op => op.Product)
+                               .FirstOrDefaultAsync(o => o.PaymentType == null);
+                //create a new empty order product that will be added later
+                var orderProduct = new OrderProduct();
+              
+                //check if the user has an open cart.
+                if (order == null)
+                {
+                    // the user has no open cart so we build a new one
+
+                    var newOrder = new Order();
+                    newOrder.UserId = user.Id;
+                    
+                    //and save it to the database
+                    _context.Order.Add(newOrder);
+                    await _context.SaveChangesAsync();
+
+                    //then we build the order product relationship
+                    orderProduct.ProductId = id;
+                    orderProduct.OrderId = newOrder.OrderId;
+
+                    //and add that to the database
+                    _context.OrderProduct.Add(orderProduct);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    //the user has a cart so we simply build that Order Product relationship
+                    orderProduct.ProductId = id;
+                    orderProduct.OrderId = order.OrderId;
+
+                    //and save that to the database
+                    _context.OrderProduct.Add(orderProduct);
+                    await _context.SaveChangesAsync();
+                }
+                
+                //return the user to the cart
+                return this.RedirectToAction("", "Orders", new { filter = "cart" });
+            }
+            catch
+            {
+                return View();
+            }
+        }
         // GET: Products/Create
         public ActionResult Create()
         {
