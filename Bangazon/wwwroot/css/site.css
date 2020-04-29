@@ -62,3 +62,12 @@ body {
 .bg-blue {
     background-color: #00BFA5 !important;
 }
+
+
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    color: #fff;
+    
+    background-color: #00BFA5 !important;
+    border-color: #1861ac;
+}

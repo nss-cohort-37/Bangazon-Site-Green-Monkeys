@@ -1,0 +1,48 @@
+﻿@model Bangazon.Models.OrderViewModels.OrderHistoryViewModel
+
+@{
+    ViewData["Title"] = "History";
+}
+
+<h3>Order History</h3>
+
+@*<p>
+    <a asp-action="Create">Create New</a>
+</p>*@
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Order Number
+            </th>
+            <th>
+                Order Date
+            </th>
+            <th>
+                Payment Type
+            </th>
+
+            <th>
+                Order Total Amount
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Orders) {
+
+        <tr>
+            <td>@item.OrderId</td>
+            <td>@item.Order.DateCompleted</td>
+            <td>@item.Order.PaymentType.Description</td>
+            @*<td>$@ViewBag.ordertotal</td>*@
+            <td>$@item.OrderTotalCost</td>
+            @*<td>
+            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+        </td>*@
+        </tr>
+}
+    </tbody>
+</table>

@@ -100,39 +100,51 @@ namespace Bangazon.Controllers
             else if (filter == "history")
             {
                 // build the item as a view model so we can show more information
-                var viewModel = new OrderDetailViewModel();
+                var viewModel = new OrderHistoryViewModel();
 
                 // Grab the order and all of it's products for the order that has no payment yet
-                var order = await _context.Order
+                var orders = await _context.Order
                                     .Where(o => o.UserId == user.Id)
                                     .Include(u => user.PaymentTypes)
                                     .Include(u => u.OrderProducts)
                                     .ThenInclude(op => op.Product)
                                     .Where(o => o.PaymentType != null).ToListAsync();
 
-                //// if order comes back empty return an empty cart page
-                //if (order.OrderProducts.Count == 0)
-                //{
+            
+                //build a list of the individual lines of products in the cart to show the quantity and price
 
-                //    return RedirectToAction(nameof(EmptyCart));
-                //}
+                var detailViewModels = new List<OrderDetailViewModel>();
 
 
-                //build the individual lines of products in the cart to show the quantity and price
-                //var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
-                //{
-                //    Product = op.Product,
-                //    Units = op.Product.Quantity,
-                //    Cost = op.Product.Price,
-                //});
+                foreach (var order in orders)
+                {
 
-                //Sum the cost, store it in the view bag to use on the view as a total price
-                //ViewBag.TotalPrice = lineItems.Sum(li => li.Cost);
+                    order.PaymentType = _context.PaymentType.FirstOrDefault(pt => pt.PaymentTypeId == order.PaymentTypeId);
 
+                    var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
 
-                //viewModel.LineItems = lineItems;
-                //viewModel.Order = order;
-                //viewModel.OrderId = order.OrderId;
+                    {
+                        Product = op.Product,
+                        Units = op.Product.Quantity,
+                        Cost = op.Product.Price,
+                    }); ;
+                    var orderViewModel = new OrderDetailViewModel();
+                    orderViewModel.LineItems = lineItems;
+                    orderViewModel.Order = order;
+                    orderViewModel.Order.PaymentType = order.PaymentType;
+                    orderViewModel.OrderId = order.OrderId;
+                    detailViewModels.Add(orderViewModel);
+
+                    //ViewBag.ordertotal = lineItems.Sum(li => li.Cost);
+                    orderViewModel.OrderTotalCost = lineItems.Sum(li => li.Cost);
+
+                }
+
+                
+
+                viewModel.Orders = detailViewModels;
+
+         
 
                 return View(viewModel);
 
