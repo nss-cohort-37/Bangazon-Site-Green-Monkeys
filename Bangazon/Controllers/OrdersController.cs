@@ -119,20 +119,20 @@ namespace Bangazon.Controllers
 
 
                 //build the individual lines of products in the cart to show the quantity and price
-                var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
-                {
-                    Product = op.Product,
-                    Units = op.Product.Quantity,
-                    Cost = op.Product.Price,
-                });
+                //var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
+                //{
+                //    Product = op.Product,
+                //    Units = op.Product.Quantity,
+                //    Cost = op.Product.Price,
+                //});
 
                 //Sum the cost, store it in the view bag to use on the view as a total price
-                ViewBag.TotalPrice = lineItems.Sum(li => li.Cost);
+                //ViewBag.TotalPrice = lineItems.Sum(li => li.Cost);
 
 
-                viewModel.LineItems = lineItems;
-                viewModel.Order = order;
-                viewModel.OrderId = order.OrderId;
+                //viewModel.LineItems = lineItems;
+                //viewModel.Order = order;
+                //viewModel.OrderId = order.OrderId;
 
                 return View(viewModel);
 
