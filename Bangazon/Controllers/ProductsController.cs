@@ -70,22 +70,52 @@ namespace Bangazon.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddToCart(int id, Product product)
         {
+            //We are adding a new product to the cart
             try
             {
                 var user = await GetCurrentUserAsync();
+                //Grabbing the order that doesn't have a payment type yet (i.e. the cart)
                 var order = await _context.Order
                                .Where(o => o.UserId == user.Id)
                                .Include(u => user.PaymentTypes)
                                .Include(u => u.OrderProducts)
                                .ThenInclude(op => op.Product)
                                .FirstOrDefaultAsync(o => o.PaymentType == null);
+                //create a new empty order product that will be added later
                 var orderProduct = new OrderProduct();
-                orderProduct.ProductId = id;
-                orderProduct.OrderId = order.OrderId;
+              
+                //check if the user has an open cart.
+                if (order == null)
+                {
+                    // the user has no open cart so we build a new one
 
-                _context.OrderProduct.Add(orderProduct);
-                await _context.SaveChangesAsync();
+                    var newOrder = new Order();
+                    newOrder.UserId = user.Id;
+                    
+                    //and save it to the database
+                    _context.Order.Add(newOrder);
+                    await _context.SaveChangesAsync();
 
+                    //then we build the order product relationship
+                    orderProduct.ProductId = id;
+                    orderProduct.OrderId = newOrder.OrderId;
+
+                    //and add that to the database
+                    _context.OrderProduct.Add(orderProduct);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    //the user has a cart so we simply build that Order Product relationship
+                    orderProduct.ProductId = id;
+                    orderProduct.OrderId = order.OrderId;
+
+                    //and save that to the database
+                    _context.OrderProduct.Add(orderProduct);
+                    await _context.SaveChangesAsync();
+                }
+                
+                //return the user to the cart
                 return this.RedirectToAction("", "Orders", new { filter = "cart" });
             }
             catch

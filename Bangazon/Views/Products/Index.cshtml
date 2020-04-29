@@ -4,7 +4,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Products</h1>
 
 <form asp-controller="Products" asp-action="Index">
     <div>
@@ -87,9 +87,12 @@
                 @Html.DisplayFor(modelItem => item.ProductType.Label)
             </td>
             <td>
-                @Html.ActionLink("add to cart", "addToCart", new { id = item.ProductId })
-                @Html.ActionLink("Details", "Details", new { id = item.ProductId })
+                @Html.ActionLink("add to cart", "addToCart", new { id = item.ProductId }) |
+               @*
+                   
                 @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
+               *@
+                @Html.ActionLink("Details", "Details", new { id = item.ProductId })
             </td>
         </tr>
         }

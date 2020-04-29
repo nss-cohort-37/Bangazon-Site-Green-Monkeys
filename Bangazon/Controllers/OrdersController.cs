@@ -49,11 +49,16 @@ namespace Bangazon.Controllers
                                     .FirstOrDefaultAsync(o => o.PaymentType == null);
 
                 // if order comes back empty return an empty cart page
-                if (order.OrderProducts.Count == 0)
+                if(order == null)
+                {
+                    return RedirectToAction(nameof(EmptyCart));
+                }
+                else if (order.OrderProducts.Count == 0 )
                 {
 
                     return RedirectToAction(nameof(EmptyCart));
-                }
+                }else
+                {
 
                 //build the individual lines of products in the cart to show the quantity and price
                 var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
@@ -72,6 +77,8 @@ namespace Bangazon.Controllers
                 viewModel.OrderId = order.OrderId;
 
                 return View(viewModel);
+                }
+
 
             } else
             {
