@@ -170,7 +170,20 @@ namespace Bangazon.Controllers
                 _context.Order.Update(order);
                 await _context.SaveChangesAsync();
 
-
+                var products = await _context.OrderProduct
+                                .Where(op => op.OrderId == order.OrderId).ToListAsync();
+                foreach( var product in products)
+                {
+                    var soldProduct = await _context.Product
+                                    .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
+                    soldProduct.Quantity -= 1;
+                    if (soldProduct.Quantity == 0)
+                    {
+                        soldProduct.Active = false;
+                    }
+                    _context.Product.Update(soldProduct);
+                    await _context.SaveChangesAsync();
+                }
                 return RedirectToAction(nameof(OrderSummary));
             }
             catch

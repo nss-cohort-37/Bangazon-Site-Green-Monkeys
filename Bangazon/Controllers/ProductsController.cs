@@ -31,6 +31,7 @@ namespace Bangazon.Controllers
             var user = await GetCurrentUserAsync();
             var products = _context.Product
                 .Where(p => p.UserId == user.Id)
+                .Where(p => p.Quantity > 0)
                 .Include(p => p.User)
                 .Include(p => p.ProductType);
                 //.ToListAsync();

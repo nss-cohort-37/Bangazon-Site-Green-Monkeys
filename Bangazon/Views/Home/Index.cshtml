@@ -1,30 +1,33 @@
 ﻿@model IEnumerable<Bangazon.Models.Product>
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @{
     ViewData["Title"] = "Home Page";
 }
 <div class="text-center">
-    <h1 class="display-4">Welcome to Bangazon @ViewBag.user.FirstName!</h1>
+    <h1 class="display-4">Welcome to Bangazon @User.Identity.Name!</h1>
     <p>explore whats new.</p>
 </div>
 
 <h6 class="text-left">Newest Listings</h6>
 <div class="d-flex flex-row justify-content-around flex-wrap">
 
-@foreach (var item in Model)
-{ <div class="card">
-    <div class="card-header bg-blue text-white">
-        @Html.DisplayFor(modelItem => item.Title)
-    </div>
-    <div class="card-body">
-        <div>
-            @Html.DisplayFor(modelItem => item.Price)
+    @foreach (var item in Model)
+    {<div class="card">
+            <div class="card-header bg-blue text-white">
+                @Html.DisplayFor(modelItem => item.Title)
+            </div>
+            <div class="card-body">
+                <div>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </div>
+                <div>
+                    @Html.ActionLink("Read More", "Details", "Products", new { id = item.ProductId })
+
+                </div>
+            </div>
         </div>
-        <div>
-            @Html.ActionLink("Read More",  "Details", "Products", new { id = item.ProductId })
-            
-        </div>
-    </div>
-</div>
     }
 </div>
-    
+
