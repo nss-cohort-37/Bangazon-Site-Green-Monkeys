@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Bangazon.Data;
@@ -10,8 +11,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace Bangazon.Controllers
 
@@ -23,22 +25,18 @@ namespace Bangazon.Controllers
 
     {
 
+
         private readonly ApplicationDbContext _context;
-
         private readonly UserManager<ApplicationUser> _userManager;
-
-
 
         public ProductsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
 
         {
 
             _context = context;
-
             _userManager = userManager;
 
         }
-
 
                 // GET: Products
         public async Task<ActionResult> Index(string searchString)
@@ -98,14 +96,19 @@ namespace Bangazon.Controllers
         // POST: ShoppingItems/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(ProductCreateViewModel productCreateViewModel)
+        public async Task<ActionResult> Create([Bind("ProductId,DateCreated,Description,Title,Price,Quantity,UserId,City,ImagePath,Active,ProductTypeId,File")]ProductCreateViewModel productCreateViewModel)
         {
+            
             try
             {
+                //get the current user object
                 var user = await GetCurrentUserAsync();
 
+                //create a product object from the values of the create view model
                 var product = new Product
+
                 {
+                    ProductId = productCreateViewModel.ProductId,
                     DateCreated = productCreateViewModel.DateCreated,
                     Price = productCreateViewModel.Price,
                     Title = productCreateViewModel.Title,
@@ -114,11 +117,22 @@ namespace Bangazon.Controllers
                     Quantity = productCreateViewModel.Quantity,
                     ProductTypeId = productCreateViewModel.ProductTypeId,
                     City = productCreateViewModel.City,
-                    ImagePath = productCreateViewModel.ImagePath
+                    Active = productCreateViewModel.Active
                 };
 
-                productCreateViewModel.UserId = user.Id;
+                if (productCreateViewModel.ImageFile != null && productCreateViewModel.ImageFile.Length > 0) { 
 
+                var fileName = Guid.NewGuid().ToString() + Path.GetFileName(productCreateViewModel.ImageFile.FileName);
+                    
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\Images", fileName);
+
+                product.ImagePath = fileName;
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await productCreateViewModel.ImageFile.CopyToAsync(stream);
+                }
+            }
                 _context.Product.Add(product);
                 await _context.SaveChangesAsync();
 
@@ -133,7 +147,9 @@ namespace Bangazon.Controllers
                 productCreateViewModel.ProductTypeOptions = productTypes;
 
                 return View(productCreateViewModel);
+
             }
+
         }
 
 
