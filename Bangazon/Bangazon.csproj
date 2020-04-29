@@ -24,11 +24,8 @@
 
 
   <ItemGroup>
-<<<<<<< HEAD
     <Folder Include="wwwroot\Images\" />
-=======
     <Folder Include="SQL Queries\" />
->>>>>>> master
   </ItemGroup>
 
 </Project>
