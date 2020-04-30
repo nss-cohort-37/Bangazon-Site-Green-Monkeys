@@ -32,7 +32,7 @@ namespace Bangazon.Controllers
             // Check if the user is logged in, if they aren't, return 401
             if (user == null)
             {
-               return new StatusCodeResult(StatusCodes.Status401Unauthorized);
+                return RedirectToAction(nameof(Unauthorized));
             }
             //if they are and the filter is cart, show them their cart
             else if (filter == "cart")
@@ -155,7 +155,7 @@ namespace Bangazon.Controllers
             }
             else
             {
-                return NotFound();
+                return RedirectToAction(nameof(Unauthorized));
             }
 
         }
@@ -169,6 +169,11 @@ namespace Bangazon.Controllers
         }
 
         public ActionResult EmptyCart(int id)
+        {
+            return View();
+        }
+
+        public ActionResult Unauthorized(int id)
         {
             return View();
         }
