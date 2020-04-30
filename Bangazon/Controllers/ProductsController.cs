@@ -12,8 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Routing.Constraints;
+
 
 namespace Bangazon.Controllers
 
@@ -75,20 +74,19 @@ namespace Bangazon.Controllers
         public async Task<ActionResult> Create()
 
         {
-            var ProductTypes = await _context.ProductType
-                .Select(pt => new SelectListItem()
-                {
-                    Text = pt.Label,
-                    Value = pt.ProductTypeId.ToString() })
+            var productCreateViewModel = new ProductCreateViewModel();
+
+            var productTypeOptions = await _context.ProductType
+                .Select(pt => new SelectListItem() { 
+                    Text = pt.Label, 
+                    Value = pt.ProductTypeId.ToString() 
+                })
                 .ToListAsync();
 
-
-                var productCreateViewModel = new ProductCreateViewModel();
-
-            productCreateViewModel.ProductTypeOptions = ProductTypes;
+            
+            productCreateViewModel.ProductTypeOptions = productTypeOptions;
 
             return View(productCreateViewModel);
-
         }
 
 
@@ -96,7 +94,7 @@ namespace Bangazon.Controllers
         // POST: ShoppingItems/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind("ProductId,DateCreated,Description,Title,Price,Quantity,UserId,City,ImagePath,Active,ProductTypeId,File")]ProductCreateViewModel productCreateViewModel)
+        public async Task<ActionResult> Create(ProductCreateViewModel productCreateViewModel)
         {
             
             try
@@ -104,27 +102,38 @@ namespace Bangazon.Controllers
                 //get the current user object
                 var user = await GetCurrentUserAsync();
 
+                var productTypes = await _context.ProductType
+                    .Select (p => new SelectListItem() 
+                    { 
+                        Text = p.Label,
+                        Value = p.ProductTypeId.ToString() })
+
+                    .ToListAsync();
+
+                productCreateViewModel.ProductTypeOptions = productTypes;
+
                 //create a product object from the values of the create view model
                 var product = new Product
 
                 {
-                    ProductId = productCreateViewModel.ProductId,
                     DateCreated = productCreateViewModel.DateCreated,
                     Price = productCreateViewModel.Price,
                     Title = productCreateViewModel.Title,
                     Description = productCreateViewModel.Description,
                     UserId = user.Id,
                     Quantity = productCreateViewModel.Quantity,
-                    ProductTypeId = productCreateViewModel.ProductTypeId,
                     City = productCreateViewModel.City,
-                    Active = productCreateViewModel.Active
+                    Active = productCreateViewModel.Active,
+                    ProductTypeId = productCreateViewModel.ProductTypeId
                 };
+
+                int id = product.ProductId;
 
                 if (productCreateViewModel.ImageFile != null && productCreateViewModel.ImageFile.Length > 0) { 
 
                 var fileName = Guid.NewGuid().ToString() + Path.GetFileName(productCreateViewModel.ImageFile.FileName);
                     
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\Images", fileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
 
                 product.ImagePath = fileName;
 
@@ -134,17 +143,13 @@ namespace Bangazon.Controllers
                 }
             }
                 _context.Product.Add(product);
+
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction("Details", new { id = product.ProductId });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                var productTypes = await _context.ProductType
-                    .Select (p => new SelectListItem() { Text = p.Label,
-                    Value = p.ProductTypeId.ToString() })
-                    .ToListAsync();
-                productCreateViewModel.ProductTypeOptions = productTypes;
 
                 return View(productCreateViewModel);
 
