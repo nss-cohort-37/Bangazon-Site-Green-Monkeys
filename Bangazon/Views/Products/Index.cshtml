@@ -4,15 +4,29 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Products</h1>
 
 <form asp-controller="Products" asp-action="Index">
     <div>
-        <input type="text" name="SearchString" placeholder="Search by Title...">
+        <input type="text" name="SearchString" placeholder=" Search by Title or City...">
         <input type="submit" value="Search" />
     </div>
 </form>
-
+<br />
+<br />
+<div>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Sporting Goods">Sporting Goods</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Appliances">Appliances</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Tools">Tools</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Games">Games</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Music">Music</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Health">Health</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Outdoors">Outdoors</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Beauty">Beauty</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Shoes">Shoes</a>
+    <a type="button" class="btn btn-success mb-2" asp-action="Index" asp-route-filter="Automotive">Automotive</a>
+    <a type="button" class="btn btn-info mb-2" asp-action="Index" asp-route-filter="All">Show All</a>
+</div>
 <p>
     <a asp-action="Create">Create New</a>
 </p>
@@ -35,7 +49,7 @@
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateCreated)
+                @Html.DisplayNameFor(model => model.ProductType)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.UserId)
@@ -43,18 +57,13 @@
             <th>
                 @Html.DisplayNameFor(model => model.City)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Active)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductType)
-            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
+
             <tr>
                 <td>
                     <image src="images/@Html.DisplayFor(modelItem => item.ImagePath)" alt="Product Image Unavailable" width="150" height="150" />
@@ -72,7 +81,7 @@
                     @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.DateCreated)
+                    @Html.DisplayFor(modelItem => item.ProductType.Label)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.User.FirstName)
@@ -81,15 +90,11 @@
                     @Html.DisplayFor(modelItem => item.City)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Active)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProductType.Label)
-                </td>
-                <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.ProductId })
+                    @Html.ActionLink("Add to Cart", "addToCart", new { id = item.ProductId }) |
+                    @*
+                        @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
+                    *@
                     @Html.ActionLink("Details", "Details", new { id = item.ProductId })
-                    @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
                 </td>
             </tr>
         }
