@@ -152,11 +152,22 @@ namespace Bangazon.Controllers
         // GET: Products/Details/5
         public async Task<ActionResult> Details(int id)
         {
+
+                        if (id == null)
+            {
+                return NotFound();
+            }
+
             var product = await _context.Product
                //.Where(p => p.UserId == user.Id)
                .Include(p => p.User)
                .Include(p => p.ProductType)
                .FirstOrDefaultAsync(p => p.ProductId == id);
+
+                        if (product == null)
+            {
+                return NotFound();
+            }
 
             return View(product);
         }
