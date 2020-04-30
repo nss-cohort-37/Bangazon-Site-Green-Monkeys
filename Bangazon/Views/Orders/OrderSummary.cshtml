@@ -4,18 +4,27 @@
     ViewData["Title"] = "OrderSummary";
 }
 
-<h1>Thank You!</h1>
+<h1 class="text-center">Thank You!</h1>
 
-<div>
-    <h4>your order is being processed</h4>
+
+
+<div class="">
+    <h4 class="text-center">your order is being processed</h4>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OrderId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OrderId)
-        </dd>
-    </dl>
+    <div class="d-flex justify-content-center">
+        <img class="center-img" src="~/Images/Successful-Shopping-Bag.png" />
+    </div>
+    @* figure out how to display order summary here
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.OrderId)
+            </dt>
+            <dd class="col-sm-10">
+               Total: $@ViewBag.TotalPrice
+            </dd>
+        </dl>
+    *@
+
+
 </div>
 

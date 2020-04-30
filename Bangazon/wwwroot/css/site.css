@@ -56,7 +56,7 @@ body {
 }
 
 .icon {
-    max-width: 20%;
+    max-width: 25%;
 }
 
 .bg-blue {
@@ -70,4 +70,7 @@ body {
     
     background-color: #00BFA5 !important;
     border-color: #1861ac;
+}
+.center-img {
+    margin: auto;
 }

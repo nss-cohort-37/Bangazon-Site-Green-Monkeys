@@ -30,6 +30,7 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -61,13 +62,25 @@
         </tr>
     </thead>
     <tbody>
+
+
         @foreach (var item in Model)
         {
 
             <tr>
-                <td>
-                    <image src="@Html.DisplayFor(modelItem => item.ImagePath)" alt="Product Image Unavailable" width="150" height="150" />
-                </td>
+                @if (item.ImagePath == null)
+                {
+
+                    <td>
+                        <img class="icon" src="~/Images/Empty-State-Charts.png" />
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <image src="@Html.DisplayFor(modelItem => item.ImagePath)" alt="Product Image Unavailable" width="150" height="150" />
+                    </td>
+                }
                 <td>
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
@@ -93,11 +106,25 @@
                     @Html.ActionLink("Add to Cart", "addToCart", new { id = item.ProductId }) |
                     @*
 
-        @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
+                        @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
                     *@
                     @Html.ActionLink("Details", "Details", new { id = item.ProductId })
                 </td>
             </tr>
+
+
         }
     </tbody>
+
 </table>
+    @if (Model.ToList().Count == 0)
+    {
+
+
+        <div class="d-flex justify-content-center">
+            <img src="~/Images/Empty-State-Charts.png" />
+        </div>
+        <p class="text-center">hmmm... looks like we don't have that</p>
+        <p class="text-center">try searching for another item</p>
+
+    }
