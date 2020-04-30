@@ -48,6 +48,7 @@ namespace Bangazon.Controllers
                                     .ThenInclude(op => op.Product)
                                     .FirstOrDefaultAsync(o => o.PaymentType == null);
 
+
                 // if order comes back empty return an empty cart page
                 if(order == null)
                 {
@@ -59,6 +60,7 @@ namespace Bangazon.Controllers
                     return RedirectToAction(nameof(EmptyCart));
                 }else
                 {
+
 
                 //build the individual lines of products in the cart to show the quantity and price
                 var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
@@ -86,6 +88,79 @@ namespace Bangazon.Controllers
             }
             
         }
+
+
+        // GET: Orders History
+        public async Task<ActionResult> History(string filter)
+        {
+            var user = await GetCurrentUserAsync();
+
+            // Check if the user is logged in, if they aren't, return 401
+            if (user == null)
+            {
+                return new StatusCodeResult(StatusCodes.Status401Unauthorized);
+            }
+            //if they are and the filter is cart, show them their cart
+            else if (filter == "history")
+            {
+                // build the item as a view model so we can show more information
+                var viewModel = new OrderHistoryViewModel();
+
+                // Grab the order and all of it's products for the order that has no payment yet
+                var orders = await _context.Order
+                                    .Where(o => o.UserId == user.Id)
+                                    .Include(u => user.PaymentTypes)
+                                    .Include(u => u.OrderProducts)
+                                    .ThenInclude(op => op.Product)
+                                    .Where(o => o.PaymentType != null).ToListAsync();
+
+            
+                //build a list of the individual lines of products in the cart to show the quantity and price
+
+                var detailViewModels = new List<OrderDetailViewModel>();
+
+
+                foreach (var order in orders)
+                {
+
+                    order.PaymentType = _context.PaymentType.FirstOrDefault(pt => pt.PaymentTypeId == order.PaymentTypeId);
+
+                    var lineItems = order.OrderProducts.Select(op => new OrderLineItem()
+
+                    {
+                        Product = op.Product,
+                        Units = op.Product.Quantity,
+                        Cost = op.Product.Price,
+                    }); ;
+                    var orderViewModel = new OrderDetailViewModel();
+                    orderViewModel.LineItems = lineItems;
+                    orderViewModel.Order = order;
+                    orderViewModel.Order.PaymentType = order.PaymentType;
+                    orderViewModel.OrderId = order.OrderId;
+                    detailViewModels.Add(orderViewModel);
+
+                    //ViewBag.ordertotal = lineItems.Sum(li => li.Cost);
+                    orderViewModel.OrderTotalCost = lineItems.Sum(li => li.Cost);
+
+                }
+
+                
+
+                viewModel.Orders = detailViewModels;
+
+         
+
+                return View(viewModel);
+
+            }
+            else
+            {
+                return NotFound();
+            }
+
+        }
+
+
 
         //order summary/confirmation view
         public ActionResult OrderSummary(int id)
